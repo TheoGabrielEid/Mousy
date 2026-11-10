@@ -1,0 +1,13 @@
+{
+  "name": "mousy",
+  "version": "1.0.0",
+  "description": "Mousy — Autonomous desktop coworker plugin. Gives Claude, ChatGPT, and AI agents live Windows screen vision, smooth mouse gliding, typing, and surgical code editing.",
+  "author": "Theo Gabriel Eid",
+  "repository": "https://github.com/TheoGabrielEid/Mousy.git",
+  "homepage": "https://github.com/TheoGabrielEid/Mousy#readme",
+  "license": "MIT",
+  "entry": "mousy_runner.py",
+  "skills": [
+    "skills/mousy/SKILL.md"
+  ]
+}

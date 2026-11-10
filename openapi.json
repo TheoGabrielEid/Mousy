@@ -1,0 +1,193 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Mousy Desktop Coworker Plugin API",
+    "description": "Desktop computer control, live screen vision, mouse gliding, clicking, typing, and surgical file operations for ChatGPT and AI agents.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8765",
+      "description": "Local Mousy Plugin Host"
+    }
+  ],
+  "paths": {
+    "/observe_screen": {
+      "post": {
+        "summary": "Capture Desktop Screen",
+        "operationId": "observe_screen",
+        "description": "Captures the user's primary Windows screen and returns dimensions and base64 JPEG image.",
+        "responses": {
+          "200": {
+            "description": "Screen captured successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "width": { "type": "integer" },
+                    "height": { "type": "integer" },
+                    "image_base64": { "type": "string" },
+                    "status": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/glide_mouse": {
+      "post": {
+        "summary": "Glide Mouse Cursor",
+        "operationId": "glide_mouse",
+        "description": "Smoothly glides the mouse cursor to target coordinates with natural human-like easing.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "integer", "description": "Target X screen coordinate" },
+                  "y": { "type": "integer", "description": "Target Y screen coordinate" },
+                  "duration": { "type": "number", "default": 0.4, "description": "Duration in seconds" }
+                },
+                "required": ["x", "y"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Cursor glided successfully" }
+        }
+      }
+    },
+    "/click": {
+      "post": {
+        "summary": "Click at Coordinates",
+        "operationId": "click",
+        "description": "Moves to coordinates and clicks (left, right, or double-click).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "integer" },
+                  "y": { "type": "integer" },
+                  "button": { "type": "string", "enum": ["left", "right", "middle"], "default": "left" },
+                  "double": { "type": "boolean", "default": false }
+                },
+                "required": ["x", "y"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Clicked successfully" }
+        }
+      }
+    },
+    "/type_text": {
+      "post": {
+        "summary": "Type Text Live",
+        "operationId": "type_text",
+        "description": "Types characters into the currently active window character-by-character.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": { "type": "string", "description": "Text to type" },
+                  "delay_ms": { "type": "integer", "default": 15, "description": "Typing delay between keystrokes" }
+                },
+                "required": ["text"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Typed successfully" }
+        }
+      }
+    },
+    "/press_key": {
+      "post": {
+        "summary": "Press Keyboard Combination",
+        "operationId": "press_key",
+        "description": "Presses a key or hotkey combination (e.g. 'enter', 'ctrl+s', 'win+r', 'alt+tab').",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "combo": { "type": "string" }
+                },
+                "required": ["combo"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Key pressed successfully" }
+        }
+      }
+    },
+    "/open_app": {
+      "post": {
+        "summary": "Launch Application or URL",
+        "operationId": "open_app",
+        "description": "Launches an application, opens a URL in default browser, or opens a document.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "target": { "type": "string", "description": "App name or URL (e.g. 'notepad', 'https://github.com')" }
+                },
+                "required": ["target"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Launched successfully" }
+        }
+      }
+    },
+    "/edit_file": {
+      "post": {
+        "summary": "Surgically Edit Code File",
+        "operationId": "edit_file",
+        "description": "Replaces exact target text with replacement code and generates unified diff.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" },
+                  "target": { "type": "string" },
+                  "replacement": { "type": "string" }
+                },
+                "required": ["path", "target", "replacement"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "File edited with diff" }
+        }
+      }
+    }
+  }
+}

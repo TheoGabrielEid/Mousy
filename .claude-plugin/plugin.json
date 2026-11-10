@@ -1,0 +1,8 @@
+{
+  "name": "mousy",
+  "version": "1.0.0",
+  "description": "Mousy — Desktop Coworker Plugin for Claude. Live screen vision, smooth mouse gliding, live typing, and code diffs.",
+  "author": "Theo Gabriel Eid",
+  "repository": "https://github.com/TheoGabrielEid/Mousy.git",
+  "entry": "mousy_runner.py"
+}

@@ -37,9 +37,25 @@ except ImportError:
     Image = None
 
 
+def _attach_to_desktop():
+    """Attach current thread to interactive desktop window station for cursor & screen access."""
+    try:
+        import ctypes
+        user32 = ctypes.windll.user32
+        hwinsta = user32.OpenWindowStationW('winsta0', False, 0x037F)
+        if hwinsta:
+            user32.SetProcessWindowStation(hwinsta)
+            hdesk = user32.OpenDesktopW('default', 0, False, 0x01FF)
+            if hdesk:
+                user32.SetThreadDesktop(hdesk)
+    except Exception:
+        pass
+
+
 def observe_screen(output_file: str = "screen.jpg") -> Dict[str, Any]:
     """Capture screen and save to disk / return dimensions."""
     try:
+        _attach_to_desktop()
         try:
             import ctypes
             ctypes.windll.shcore.SetProcessDpiAwareness(2)
@@ -91,9 +107,10 @@ def observe_screen(output_file: str = "screen.jpg") -> Dict[str, Any]:
         return {"status": "error", "message": str(e)}
 
 
-def glide_mouse(x: int, y: int, duration: float = 0.35) -> Dict[str, Any]:
-    """Smoothly glide cursor with human easing."""
+def glide_mouse(x: int = None, y: int = None, dx: int = None, dy: int = None, duration: float = 0.5) -> Dict[str, Any]:
+    """Smoothly glide cursor with human easing (supports absolute x, y and relative dx, dy)."""
     try:
+        _attach_to_desktop()
         import ctypes
         user32 = ctypes.windll.user32
         class POINT(ctypes.Structure):
@@ -101,9 +118,22 @@ def glide_mouse(x: int, y: int, duration: float = 0.35) -> Dict[str, Any]:
         pt = POINT()
         user32.GetCursorPos(ctypes.byref(pt))
         start_x, start_y = pt.x, pt.y
-        target_x, target_y = int(x), int(y)
+
+        if dx is not None:
+            target_x = start_x + int(dx)
+        elif x is not None:
+            target_x = int(x)
+        else:
+            target_x = start_x
+
+        if dy is not None:
+            target_y = start_y + int(dy)
+        elif y is not None:
+            target_y = int(y)
+        else:
+            target_y = start_y
         
-        steps = max(10, int(duration * 50))
+        steps = max(15, int(duration * 60))
         sleep_per_step = max(0.002, duration / steps)
         for i in range(1, steps + 1):
             t = i / steps
@@ -114,6 +144,32 @@ def glide_mouse(x: int, y: int, duration: float = 0.35) -> Dict[str, Any]:
             time.sleep(sleep_per_step)
         user32.SetCursorPos(target_x, target_y)
         return {"status": "success", "from": [start_x, start_y], "to": [target_x, target_y]}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+def wiggle_mouse(radius: int = 200, duration: float = 1.2) -> Dict[str, Any]:
+    """Visibly moves mouse in a full circle around its current position on whatever screen the user is on."""
+    try:
+        _attach_to_desktop()
+        import ctypes, math
+        user32 = ctypes.windll.user32
+        class POINT(ctypes.Structure):
+            _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+        pt = POINT()
+        user32.GetCursorPos(ctypes.byref(pt))
+        cx, cy = pt.x, pt.y
+
+        steps = 80
+        sleep_time = duration / steps
+        for i in range(steps + 1):
+            angle = (i / steps) * 2 * math.pi
+            x = int(cx + radius * math.sin(angle))
+            y = int(cy - radius * (1 - math.cos(angle)))
+            user32.SetCursorPos(x, y)
+            time.sleep(sleep_time)
+        user32.SetCursorPos(cx, cy)
+        return {"status": "success", "center": [cx, cy], "radius": radius}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -246,9 +302,16 @@ def main():
 
     # glide
     glide_p = subparsers.add_parser("glide", help="Smoothly glide mouse to coordinates")
-    glide_p.add_argument("x", type=int, help="Target X coordinate")
-    glide_p.add_argument("y", type=int, help="Target Y coordinate")
-    glide_p.add_argument("--duration", type=float, default=0.35, help="Glide duration in seconds")
+    glide_p.add_argument("x", type=int, nargs="?", default=None, help="Target X coordinate")
+    glide_p.add_argument("y", type=int, nargs="?", default=None, help="Target Y coordinate")
+    glide_p.add_argument("--dx", type=int, default=None, help="Relative X movement")
+    glide_p.add_argument("--dy", type=int, default=None, help="Relative Y movement")
+    glide_p.add_argument("--duration", type=float, default=0.5, help="Glide duration in seconds")
+
+    # wiggle
+    wiggle_p = subparsers.add_parser("wiggle", help="Visibly wiggle mouse in a circle around current position")
+    wiggle_p.add_argument("--radius", type=int, default=200, help="Circle radius in pixels")
+    wiggle_p.add_argument("--duration", type=float, default=1.5, help="Duration in seconds")
 
     # click
     click_p = subparsers.add_parser("click", help="Click at coordinates")
@@ -285,7 +348,9 @@ def main():
     if args.command == "observe":
         res = observe_screen(output_file=args.out)
     elif args.command == "glide":
-        res = glide_mouse(x=args.x, y=args.y, duration=args.duration)
+        res = glide_mouse(x=args.x, y=args.y, dx=args.dx, dy=args.dy, duration=args.duration)
+    elif args.command == "wiggle":
+        res = wiggle_mouse(radius=args.radius, duration=args.duration)
     elif args.command == "click":
         res = click(x=args.x, y=args.y, button=args.button, double=args.double)
     elif args.command == "type":

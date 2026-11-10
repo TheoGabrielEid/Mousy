@@ -3,15 +3,17 @@
 <div align="center">
 
 [![Platform](https://img.shields.io/badge/Platform-Windows_11-0078D4?style=flat-square&logo=windows)](https://microsoft.com)
-[![Claude Desktop](https://img.shields.io/badge/Claude_Desktop-Plugin-D97757?style=flat-square&logo=anthropic)](https://claude.ai)
+[![Claude Plugin](https://img.shields.io/badge/Claude-Plugin-D97757?style=flat-square&logo=anthropic)](https://claude.ai)
 [![ChatGPT Actions](https://img.shields.io/badge/ChatGPT-Custom_Actions-10A37F?style=flat-square&logo=openai)](https://chatgpt.com)
 [![Antigravity](https://img.shields.io/badge/Antigravity-Agent_Plugin-4285F4?style=flat-square&logo=google)](https://deepmind.google)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-**Give Claude and ChatGPT eyes on your screen, a mouse pointer to guide, and keyboard control.**  
-Mousy is a pure, lightweight plugin that turns your favorite AI models into autonomous desktop pair programmers.
+> **"Claude plugins are installable add-ons that bundle skills, rules, and scripts."**
 
-[Quickstart](#-quickstart) • [Claude Desktop Setup](#-claude-desktop-setup) • [ChatGPT Setup](#-chatgpt-setup) • [Setup Guide](./GUIDE_CLAUDE_CHATGPT.md) • [Capabilities](#-plugin-capabilities)
+**Give Claude and ChatGPT eyes on your Windows screen, smooth mouse gliding, and keyboard control.**  
+Mousy is a pure plugin add-on that turns your favorite AI models into autonomous desktop pair programmers without any heavy desktop app bloat.
+
+[Quickstart](#-quickstart) • [Claude Plugin Setup](#-claude-plugin-setup) • [ChatGPT Setup](#-chatgpt-setup) • [Full Guide](./GUIDE_CLAUDE_CHATGPT.md) • [Bundled Skills](#-bundled-skills)
 
 </div>
 
@@ -19,7 +21,13 @@ Mousy is a pure, lightweight plugin that turns your favorite AI models into auto
 
 ## ⚡ Quickstart
 
-Clone the repository and run the 1-click installer:
+Install the Mousy plugin directly into Claude:
+
+```powershell
+claude plugin add TheoGabrielEid/Mousy
+```
+
+Or clone and run the installer for Antigravity & Gemini agents:
 
 ```powershell
 git clone https://github.com/TheoGabrielEid/Mousy.git
@@ -28,64 +36,58 @@ pip install -r requirements.txt
 python install.py
 ```
 
-`install.py` automatically configures **Claude Desktop** and **Antigravity**!
-
 ---
 
-## 🔌 Claude Desktop Setup
+## 🔌 Claude Plugin Setup
 
-1. Open `%APPDATA%\Claude\claude_desktop_config.json`
-2. Add `"mousy"`:
+Claude plugins are installable add-ons that bundle skills and rules.
 
-```json
-{
-  "mcpServers": {
-    "mousy": {
-      "command": "python",
-      "args": [
-        "C:\\path\\to\\Mousy\\mousy_runner.py"
-      ]
-    }
-  }
-}
+### Install via Claude CLI:
+```powershell
+claude plugin add TheoGabrielEid/Mousy
 ```
 
-3. Restart Claude Desktop. The hammer icon will show all Mousy tools.
+### What Claude Can Do:
+- **Inspect Display**: `observe` captures high-resolution screenshots for Claude's vision.
+- **Glide Cursor**: `glide` moves the pointer with natural human-like ease-in-out interpolation.
+- **Click Elements**: `click` coordinates on screen (left, right, double-click).
+- **Interactive Typing**: `type` enters characters live into the currently focused window.
+- **Surgical Diffs**: `edit` applies clean string replacements and outputs unified color diffs.
 
 ---
 
 ## 🤖 ChatGPT Setup
 
-1. Go to [chatgpt.com](https://chatgpt.com) ➔ **Explore GPTs** ➔ **+ Create**.
+1. Open [chatgpt.com](https://chatgpt.com) ➔ **Explore GPTs** ➔ **+ Create**.
 2. Under **Configure** ➔ **Actions**, import [`openapi.json`](./openapi.json).
 3. If using web ChatGPT, route via local tunnel (`ngrok http 8765`).
 4. Save and start chatting!
 
-See [**GUIDE_CLAUDE_CHATGPT.md**](./GUIDE_CLAUDE_CHATGPT.md) for full instructions.
+See [**GUIDE_CLAUDE_CHATGPT.md**](./GUIDE_CLAUDE_CHATGPT.md) for detailed walkthrough.
 
 ---
 
-## 🛠️ Plugin Capabilities
+## 🛠️ Bundled Skills & Commands
 
-| Tool | Action |
-| :--- | :--- |
-| `observe_screen` | Captures primary screen for vision models (returns resolution and base64 JPEG). |
-| `glide_mouse` | Moves cursor with smooth ease-in-out quadratic interpolation. |
-| `click` | Left click, right click, or double click at coordinates. |
-| `type_text` | Types text directly into the focused application character-by-character. |
-| `press_key` | Presses hotkeys (`ctrl+s`, `win+r`, `enter`, `alt+tab`, etc.). |
-| `scroll` | Scrolls mouse wheel up or down. |
-| `open_app` | Launches any program or opens a URL in default browser. |
-| `edit_file` | Surgically edits code files and returns clean unified diffs. |
-| `read_file` | Safely inspects file contents. |
-| `write_file` | Writes or creates files. |
+Mousy bundles CLI utilities inside `scripts/mousy.py`:
+
+| Action | Command | Description |
+| :--- | :--- | :--- |
+| **Observe** | `python scripts/mousy.py observe --out screen.jpg` | Captures primary screen for vision models. |
+| **Glide** | `python scripts/mousy.py glide 500 300` | Smoothly glides cursor with human easing. |
+| **Click** | `python scripts/mousy.py click 500 300` | Clicks left, right, or double-click. |
+| **Type** | `python scripts/mousy.py type "Draft text"` | Types live into the active application. |
+| **Press** | `python scripts/mousy.py press "ctrl+s"` | Presses hotkeys (`ctrl+s`, `win+r`, `enter`). |
+| **Scroll** | `python scripts/mousy.py scroll -3` | Scrolls mouse wheel up or down. |
+| **Open** | `python scripts/mousy.py open "notepad"` | Launches any application or browser URL. |
+| **Edit** | `python scripts/mousy.py edit --path ...` | Surgically edits code files with unified diffs. |
 
 ---
 
-## 🛡️ Safety Architecture
+## 🛡️ Human-in-the-Loop Safety
 
-- **Human Confirmation Gate**: Mousy will never submit web forms or press "Send" on emails automatically. It prepares the draft on screen and asks for your confirmation.
-- **Non-destructive Editing**: Code changes are performed with surgical string replacements and unified diffs.
+- **Confirmation Gate**: Mousy will never submit web forms or send emails automatically without human confirmation. It prepares drafts on screen and signals the user.
+- **Non-destructive Diffs**: Edits are performed surgically with unified diffs.
 
 ---
 

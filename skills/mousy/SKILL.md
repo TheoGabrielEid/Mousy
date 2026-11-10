@@ -1,51 +1,76 @@
 ---
 name: mousy
-description: Autonomous desktop pair programming plugin. Live screen vision, smooth mouse gliding, clicking, typing, and surgical code diff editing on Windows for Claude, ChatGPT, and AI agents.
+description: Autonomous desktop pair programming plugin. Bundles live Windows screen vision, smooth mouse gliding, clicking, live typing, and surgical code diff editing.
 ---
 
-# Mousy — Desktop Coworker Plugin
+# Mousy — Desktop Coworker Skill
 
-Mousy empowers AI agents to interact with the user's live Windows desktop and collaborate in real-time.
+Mousy empowers AI agents (Claude, ChatGPT, and Antigravity) to interact directly with the user's live Windows desktop.
 
-## Capabilities
+## Available Capabilities & CLI Commands
 
-1. **`observe_screen()`**:
-   - Takes a real-time screenshot of the primary Windows monitor.
-   - Returns resolution (`width`, `height`) and base64 JPEG data for multimodal vision models.
+You can execute any of Mousy's capabilities using the bundled script `scripts/mousy.py`:
 
-2. **`glide_mouse(x, y, duration=0.4)`**:
-   - Smoothly moves the mouse cursor to `(x, y)` using human-like ease-in-out quadratic interpolation.
+### 1. Observe Desktop Screen
+Captures the primary monitor and saves a screenshot:
+```powershell
+python scripts/mousy.py observe --out screen.jpg
+```
+Returns: Screen resolution (`width`, `height`) and image path.
 
-3. **`click(x, y, button="left", double=False)`**:
-   - Glides cursor to coordinates and performs a left, right, or double click.
+### 2. Smooth Mouse Gliding
+Glides the cursor smoothly to `(X, Y)` with human-like ease-in-out interpolation:
+```powershell
+python scripts/mousy.py glide 500 350
+```
 
-4. **`type_text(text, delay_ms=15)`**:
-   - Types characters live into the currently active window character-by-character.
+### 3. Mouse Clicking
+Clicks at coordinates (supports `left`, `right`, and double click):
+```powershell
+python scripts/mousy.py click 500 350
+python scripts/mousy.py click 500 350 --double
+python scripts/mousy.py click 500 350 --button right
+```
 
-5. **`press_key(combo)`**:
-   - Triggers key combinations (e.g., `enter`, `ctrl+s`, `win+r`, `alt+tab`, `ctrl+c`, `ctrl+v`).
+### 4. Interactive Typing
+Types text live into the currently active window character-by-character:
+```powershell
+python scripts/mousy.py type "Hello world"
+```
 
-6. **`scroll(amount=-3)`**:
-   - Scrolls the mouse wheel up (positive) or down (negative).
+### 5. Keyboard Combos
+Triggers key combinations and hotkeys:
+```powershell
+python scripts/mousy.py press "ctrl+s"
+python scripts/mousy.py press "win+r"
+python scripts/mousy.py press "enter"
+```
 
-7. **`open_app(target)`**:
-   - Launches any Windows application or navigates to a URL in the browser.
+### 6. Mouse Wheel Scrolling
+Scrolls up or down:
+```powershell
+python scripts/mousy.py scroll -3
+```
 
-8. **`edit_file(path, target, replacement)`**:
-   - Surgically modifies code files and produces clean color unified diffs.
+### 7. App & URL Launcher
+Launches applications or navigates to URLs:
+```powershell
+python scripts/mousy.py open "notepad"
+python scripts/mousy.py open "https://github.com"
+```
 
-9. **`read_file(path, start_line=1, line_count=100)`**:
-   - Reads chunks of files safely.
-
-10. **`write_file(path, content)`**:
-    - Creates or updates files.
+### 8. Surgical Code Diffs
+Replaces target blocks and outputs unified diffs:
+```powershell
+python scripts/mousy.py edit --path "src/app.py" --target "def old():" --replacement "def new():"
+```
 
 ---
 
 ## Safety Protocol
 
-- **Never submit irreversible actions automatically**:
-  - Never press "Send" on emails or click "Submit" on payment/account forms without human review.
-  - Draft content live in the active window, leave it visible for the user, and prompt them to confirm.
-- **Always observe before action**:
-  - Call `observe_screen()` first to verify coordinate positions before clicking.
+- **Human-in-the-Loop Confirmation**:
+  - Never press "Send" on emails or submit irreversible forms automatically.
+  - Type drafts on screen, highlight what was done, and ask the user to confirm.
+- **Inspect Before Action**:
+  - Always run `observe` first to verify coordinate positions before clicking.

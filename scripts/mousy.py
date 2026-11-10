@@ -108,7 +108,7 @@ def observe_screen(output_file: str = "screen.jpg") -> Dict[str, Any]:
 
 
 def glide_mouse(x: int = None, y: int = None, dx: int = None, dy: int = None, duration: float = 0.5) -> Dict[str, Any]:
-    """Smoothly glide cursor with human easing (supports absolute x, y and relative dx, dy)."""
+    """Smoothly glide cursor with physical hardware events and easing."""
     try:
         _attach_to_desktop()
         import ctypes
@@ -133,23 +133,31 @@ def glide_mouse(x: int = None, y: int = None, dx: int = None, dy: int = None, du
         else:
             target_y = start_y
         
-        steps = max(15, int(duration * 60))
+        steps = max(20, int(duration * 60))
         sleep_per_step = max(0.002, duration / steps)
+        prev_x, prev_y = start_x, start_y
+
         for i in range(1, steps + 1):
             t = i / steps
             ease_t = 2 * t * t if t < 0.5 else -1 + (4 - 2 * t) * t
             cx = int(start_x + (target_x - start_x) * ease_t)
             cy = int(start_y + (target_y - start_y) * ease_t)
+            step_dx = cx - prev_x
+            step_dy = cy - prev_y
             user32.SetCursorPos(cx, cy)
+            user32.mouse_event(0x0001, step_dx, step_dy, 0, 0)
+            prev_x, prev_y = cx, cy
             time.sleep(sleep_per_step)
+
         user32.SetCursorPos(target_x, target_y)
+        user32.mouse_event(0x0001, 0, 0, 0, 0)
         return {"status": "success", "from": [start_x, start_y], "to": [target_x, target_y]}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
 
 def wiggle_mouse(radius: int = 200, duration: float = 1.2) -> Dict[str, Any]:
-    """Visibly moves mouse in a full circle around its current position on whatever screen the user is on."""
+    """Visibly moves mouse in a full circle around its current position using physical hardware events."""
     try:
         _attach_to_desktop()
         import ctypes, math
@@ -162,12 +170,19 @@ def wiggle_mouse(radius: int = 200, duration: float = 1.2) -> Dict[str, Any]:
 
         steps = 80
         sleep_time = duration / steps
+        prev_x, prev_y = cx, cy
+
         for i in range(steps + 1):
             angle = (i / steps) * 2 * math.pi
             x = int(cx + radius * math.sin(angle))
             y = int(cy - radius * (1 - math.cos(angle)))
+            step_dx = x - prev_x
+            step_dy = y - prev_y
             user32.SetCursorPos(x, y)
+            user32.mouse_event(0x0001, step_dx, step_dy, 0, 0)
+            prev_x, prev_y = x, y
             time.sleep(sleep_time)
+
         user32.SetCursorPos(cx, cy)
         return {"status": "success", "center": [cx, cy], "radius": radius}
     except Exception as e:
